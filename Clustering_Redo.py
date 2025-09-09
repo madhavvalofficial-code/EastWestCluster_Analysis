@@ -203,22 +203,17 @@ plt.show()
 
 #performing kclustering without Balance
 scores=[]
-X=df1.iloc[:,1:14]
+X_kmeans=df1.iloc[:,1:14]
 for i in range(2,11,1):
     k_cluster=KMeans(n_clusters=i)
-    df1['k_new1']=k_cluster.fit_predict(X)
-    scores.append(silhouette_score(X,df1['k_new1']))
+    df1['k_new1']=k_cluster.fit_predict(X_kmeans)
+    scores.append(silhouette_score(X_kmeans,df1['k_new1']))
 plt.scatter(range(2,11,1),scores)
 plt.plot(range(2,11,1),scores, color='black')
 plt.xlabel('KValue')
 plt.ylabel('silhouette score')
 plt.show()
 
-
-# In[ ]:
-
-
-#with balance
 
 
 # In[42]:
@@ -246,7 +241,7 @@ df2.head()
 # In[21]:
 
 
-X=df2.iloc[:,1:]
+X_db=df2.iloc[:,1:]
 eps_values = np.arange(0.1, 1.0, 0.1)
 
 min_samples_values = np.arange(5, 20, 1)
@@ -291,18 +286,18 @@ complete_clusters=[]
 avergae_clusters=[]
 ward_clusters=[]
 agg_single = AgglomerativeClustering(n_clusters=2, linkage='single')
-single_clusters = agg_single.fit_predict(X)
+single_clusters = agg_single.fit_predict(X_kmeans)
 agg_complete = AgglomerativeClustering(n_clusters=2, linkage='complete')
-complete_clusters = agg_complete.fit_predict(X)
+complete_clusters = agg_complete.fit_predict(X_kmeans)
 agg_average = AgglomerativeClustering(n_clusters=2, linkage='average')
-average_clusters = agg_average.fit_predict(X)
+average_clusters = agg_average.fit_predict(X_kmeans)
 agg_ward = AgglomerativeClustering(n_clusters=2, linkage='ward')
-ward_clusters = agg_ward.fit_predict(X)
+ward_clusters = agg_ward.fit_predict(X_kmeans)
 # Calculate silhouette scores using the correctly named cluster variables
-SS1 = silhouette_score(X, single_clusters)
-SS2 = silhouette_score(X, complete_clusters)
-SS3 = silhouette_score(X, average_clusters)
-SS4 = silhouette_score(X, ward_clusters)
+SS1 = silhouette_score(X_kmeans, single_clusters)
+SS2 = silhouette_score(X_kmeans, complete_clusters)
+SS3 = silhouette_score(X_kmeans, average_clusters)
+SS4 = silhouette_score(X_kmeans, ward_clusters)
 
 # Print the scores
 print(f"Single Linkage Silhouette Score: {SS1:.4f}")
@@ -321,11 +316,11 @@ df1.head()
 
 
 agg_scores=[]
-X=df1.iloc[:,1:14]
+X_agg=df1.iloc[:,1:14]
 for i in range(2,11,1):
     agg_average = AgglomerativeClustering(n_clusters=i, linkage='average')
-    df1['agg_new']=agg_average.fit_predict(X)
-    agg_scores.append(silhouette_score(X,df1['agg_new']))
+    df1['agg_new']=agg_average.fit_predict(X_agg)
+    agg_scores.append(silhouette_score(X_agg,df1['agg_new']))
 plt.scatter(range(2,11,1),agg_scores)
 plt.plot(range(2,11,1),agg_scores, color='black')
 plt.xlabel('ClusterValue')
@@ -337,7 +332,7 @@ plt.show()
 
 
 agg_cluster = AgglomerativeClustering(n_clusters=2, linkage='average')
-df['agg_cluster']=agg_cluster.fit_predict(X)
+df['agg_cluster']=agg_cluster.fit_predict(X_agg)
 df
 
 
@@ -413,13 +408,41 @@ df['Topflight'].groupby(df['agg_cluster']).value_counts()
 df['Award?'].groupby(df['agg_cluster']).value_counts()
 
 
-# In[55]:
+# In[57]:
+
+
+def plot_one_vs_all_clusters(df, target_col, other_cols):
+    
+    n_plots = len(other_cols)
+    ncols = min(3, n_plots)
+    nrows = (n_plots + ncols - 1) // ncols
+    
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(6*ncols, 4*nrows))
+    axes = axes.flatten() if n_plots > 1 else [axes]
+    
+    for i, col in enumerate(other_cols):
+        if col != target_col:
+            axes[i].scatter(df[target_col], df[col], c=df['agg_cluster'], cmap='rainbow', alpha=0.3)
+            axes[i].set_xlabel(target_col)
+            axes[i].set_ylabel(col)
+            axes[i].set_title(f'{target_col} vs {col}')
+            axes[i].grid(True, alpha=0.3)
+            
+    # Hiding unused subplots
+    for j in range(len(other_cols), len(axes)):
+        axes[j].set_visible(False)
+    
+    plt.tight_layout()
+    plt.show()
 
 
 
 
+# In[58]:
 
-# In[ ]:
+
+plot_one_vs_all_clusters(df, 'Bonus_miles', ['Balance','Bonus_trans','Flight_miles_12mo','Flight_trans_12','Topflight','Award?'])
+plot_one_vs_all_clusters(df1, 'Flight_miles_12mo', ['Balance','Bonus_trans','Bonus_miles','Flight_trans_12','Topflight','Award?'])
 
 
 
