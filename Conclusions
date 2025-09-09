@@ -1,0 +1,9 @@
+Agglomerative/Hierarchical Clustering using average linkage was found to be a better fit for the data, as it achieved the highest silhouette score of all the methods. 
+Under this method the most apt cluster number was 2, hence the customers can be divided into:
+
+0 -> Infrequent/Inactive Flyers: Make up majority of the data but contribute the least in terms of miles covered. Their transaction volume is high but volume per transaction is very low. 
+
+1-> Frequent/Active Flyers: Make up a small part but contribute the highest in terms of miles covered. Though they have a lower transaction volume the miles earned per transaction are much higher. 
+They also have a higher mean balance. The individual in this cluster might be high spenders.
+
+KMeans was also a close second in terms of performance with a high 0.36 silhouette score at clusters=2, whereas DBScan was the worst performing with a silhouette score of 0.1 at 19 cluster value.
